@@ -13,6 +13,10 @@
  */
 package org.fisco.bcos.sdk.demo.perf.collector;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.fisco.bcos.sdk.model.JsonRpcResponse;
@@ -28,13 +32,16 @@ public class PerformanceCollector {
     private AtomicLong less400 = new AtomicLong(0);
     private AtomicLong less1000 = new AtomicLong(0);
     private AtomicLong less2000 = new AtomicLong(0);
-    private AtomicLong timeout2000 = new AtomicLong(0);
+    private AtomicLong less4000 = new AtomicLong(0);
+    private AtomicLong less8000 = new AtomicLong(0);
+    private AtomicLong timeout8000 = new AtomicLong(0);
     private AtomicLong totalCost = new AtomicLong(0);
 
     private Integer total = 0;
     private AtomicInteger received = new AtomicInteger(0);
     private AtomicInteger error = new AtomicInteger(0);
     private Long startTimestamp = System.currentTimeMillis();
+    private ArrayList<Long> costs = new ArrayList<>();
 
     public Integer getTotal() {
         return total;
@@ -106,9 +113,15 @@ public class PerformanceCollector {
             less1000.incrementAndGet();
         } else if (cost < 2000) {
             less2000.incrementAndGet();
+        } else if (cost < 4000) {
+            less4000.incrementAndGet();
+        } else if (cost < 8000) {
+            less8000.incrementAndGet();
         } else {
-            timeout2000.incrementAndGet();
+            timeout8000.incrementAndGet();
         }
+
+        costs.add(cost);
 
         totalCost.addAndGet(cost);
 
@@ -173,11 +186,32 @@ public class PerformanceCollector {
                             + String.valueOf((double) less2000.get() / total * 100)
                             + "%");
             System.out.println(
-                    "2000 < time           : "
-                            + String.valueOf(timeout2000)
+                    "2000 < time < 4000ms  : "
+                            + String.valueOf(less4000)
                             + "  : "
-                            + String.valueOf((double) timeout2000.get() / total * 100)
+                            + String.valueOf((double) less4000.get() / total * 100)
                             + "%");
+            System.out.println(
+                    "4000 < time < 8000ms  : "
+                            + String.valueOf(less8000)
+                            + "  : "
+                            + String.valueOf((double) less8000.get() / total * 100)
+                            + "%");
+            System.out.println(
+                    "8000 < time           : "
+                            + String.valueOf(timeout8000)
+                            + "  : "
+                            + String.valueOf((double) timeout8000.get() / total * 100)
+                            + "%");
+
+            try {
+                String fileName = "costs" + System.currentTimeMillis() + ".txt";
+                PrintWriter pw = new PrintWriter(new FileOutputStream(fileName));
+                pw.write(costs.toString());
+                pw.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 
