@@ -76,8 +76,8 @@ public class PerformanceAISChain {
                     TransactionProcessorFactory.createAssembleTransactionProcessor(
                             client,
                             keyPair,
-                            "/home/junqin/java-sdk-demo/src/main/resources/abi/",
-                            "/home/junqin/java-sdk-demo/src/main/resources/bin/");
+                            "~/java-sdk-demo/src/main/resources/abi/",
+                            "~/java-sdk-demo/src/main/resources/bin/");
 
             // deploy the AISChain
             System.out.println("====== Deploy AISChain ====== ");
