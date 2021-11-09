@@ -77,8 +77,8 @@ public class PerformanceAISChainContinuous {
                     TransactionProcessorFactory.createAssembleTransactionProcessor(
                             client,
                             keyPair,
-                            "~/java-sdk-demo/src/main/resources/abi/",
-                            "~/java-sdk-demo/src/main/resources/bin/");
+                            "../src/main/resources/abi/",
+                            "../src/main/resources/bin/");
 
             // deploy the AISChain
             System.out.println("====== Deploy AISChain ====== ");
