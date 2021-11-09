@@ -3,15 +3,53 @@
 # Please firstly prepare "build_chain.sh" and "fisco-bcos" binary before running this script. 
 # https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/installation.html
 
-num_of_nodes=$1
+type=$1
 
-bash nodes/127.0.0.1/stop_all.sh
+# single pc
+if [[ $type -eq 1 ]]
+then
+  num_of_nodes=$2
 
-rm -rf nodes/
+  bash nodes/127.0.0.1/stop_all.sh
+  rm -rf nodes/
 
-bash build_chain.sh -l 127.0.0.1:$num_of_nodes -p 30300,20200,8545
+  bash build_chain.sh -l 127.0.0.1:$num_of_nodes -p 30300,20200,8545
+  bash nodes/127.0.0.1/start_all.sh
 
-bash nodes/127.0.0.1/start_all.sh
+  cp -r nodes/127.0.0.1/sdk/* ~/java-sdk-demo/dist/conf/
 
-cp -r nodes/127.0.0.1/sdk/* ~/java-sdk-demo/dist/conf/
+# multiple pc
+elif [[ $type -eq 2 ]]
+then
 
+  local_ip=$2
+  username=$3
+  passwd=$4
+
+  rm -rf nodes/
+
+  bash build_chain.sh -f ipconf -p 30300,20200,8545
+
+  bash ~/fisco/$local_ip/stop_all.sh && rm -rf ~/fisco
+  mkdir -p ~/fisco
+  cp -r nodes/$local_ip/ ~/fisco/$local_ip
+  bash ~/fisco/$local_ip/start_all.sh
+
+  awk -F ' ' '{print $1}' ipconf | while read ip
+  do
+  if [[ $local_ip == $ip ]]
+  then
+    echo "skip local ip"
+    continue
+  fi
+  sshpass -p $passwd ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $username@$ip "bash ~/fisco/"$ip"/stop_all.sh && rm -rf ~/fisco"
+  sshpass -p $passwd ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $username@$ip "mkdir -p ~/fisco"
+  sshpass -p $passwd scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r nodes/$ip/ $username@$ip:~/fisco/$ip
+  sshpass -p $passwd ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $username@$ip "bash ~/fisco/"$ip"/start_all.sh"
+  done
+
+  cp -r nodes/$local_ip/sdk/* ~/java-sdk-demo/dist/conf/
+
+else
+  echo "check your parameter"
+fi

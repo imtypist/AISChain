@@ -2,6 +2,8 @@
 
 type=$1
 
+rm log/*.log
+
 if [[ $type -eq 1 ]]
 then
   txns=$2
