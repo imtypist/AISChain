@@ -8,3 +8,5 @@ conf
 nodes
 initEnv.sh
 tassl
+console
+*tar.gz
