@@ -23,8 +23,8 @@ elif [[ $type -eq 2 ]]
 then
 
   local_ip=$2
-  username=$3
-  passwd=$4
+  username="intcl"
+  passwd="intcl2021"
 
   rm -rf nodes/
 
@@ -35,7 +35,9 @@ then
   cp -r nodes/$local_ip/ ~/fisco/$local_ip
   bash ~/fisco/$local_ip/start_all.sh
 
-  awk -F ' ' '{print $1}' ipconf | while read ip
+  exec 3<aliveip.txt
+
+  while read ip<&3;
   do
   if [[ $local_ip == $ip ]]
   then

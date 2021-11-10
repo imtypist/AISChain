@@ -3,6 +3,7 @@ package org.fisco.bcos.sdk.demo.perf;
 import com.google.common.util.concurrent.RateLimiter;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class PerformanceAISChainContinuous {
     private static void Usage() {
         System.out.println(" Usage:");
         System.out.println(
-                " \t java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.demo.perf.PerformanceAISChainContinuous [qps] [groupId] [path_to_ais_csv].");
+                " \t java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.demo.perf.PerformanceAISChainContinuous [start_qps] [groupId] [path_to_ais_csv].");
     }
 
     public static void main(String[] args) {
@@ -58,7 +59,6 @@ public class PerformanceAISChainContinuous {
             String AISFile = String.valueOf(args[2]);
             System.out.println(
                     "====== PerformanceAISChainContinuous trans, qps: "
-                            + ", qps:"
                             + qps
                             + ", groupId: "
                             + groupId
@@ -112,6 +112,11 @@ public class PerformanceAISChainContinuous {
             collector.setQps(qps);
 
             while (true) {
+                BigInteger pendingTxSize = client.getPendingTxSize().getPendingTxSize();
+                if (pendingTxSize.compareTo(BigInteger.valueOf((long) (qps * 1.2))) == 1) {
+                    // System.out.println("Pending Size: " + pendingTxSize);
+                    continue;
+                }
                 limiter.acquire();
                 // int index = i % AISData.size();
                 threadPoolService
